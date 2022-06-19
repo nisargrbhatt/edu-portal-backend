@@ -1,0 +1,495 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator nestgraphql {
+  provider               = "node node_modules/prisma-nestjs-graphql"
+  output                 = "../src/@generated/prisma-nestjs-graphql"
+  fields_Validator_from  = "class-validator"
+  fields_Validator_input = true
+}
+
+model AdminType {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  thumbnail   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  Admin       Admin[]
+}
+
+model AdminDepartment {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  thumbnail   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  Admin       Admin[]
+}
+
+model Admin {
+  id                Int               @id @default(autoincrement())
+  name              String
+  displayName       String            @unique
+  dateOfBirth       DateTime
+  email             String
+  password          String
+  notificationMail  String
+  contactNo         String
+  emailVerified     Boolean           @default(false)
+  emailOtp          Int?
+  emailOtpSentTime  DateTime?
+  lastLogin         DateTime?
+  uuid              String            @default(uuid())
+  ip                String?
+  location          String?
+  permissions       String
+  adminTypeId       Int
+  adminType         AdminType?        @relation(fields: [adminTypeId], references: [id])
+  adminDepartmentId Int
+  adminDepartment   AdminDepartment?  @relation(fields: [adminDepartmentId], references: [id])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+  Address           Address?
+  courses           Course[]
+  Student           Student[]
+  Faculty           Faculty[]
+  CollageCircular   CollageCircular[]
+  StudentFee        StudentFee[]
+}
+
+model Student {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  displayName         String                @unique
+  dateOfBirth         DateTime
+  email               String
+  password            String
+  notificationMail    String
+  contactNo           String
+  emailVerified       Boolean               @default(false)
+  emailOtp            Int?
+  emailOtpSentTime    DateTime?
+  lastLogin           DateTime?
+  uuid                String                @default(uuid())
+  ip                  String?
+  location            String?
+  adminId             Int
+  admin               Admin                 @relation(fields: [adminId], references: [id])
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+  Address             Address?
+  ClassroomAttendance ClassroomAttendance[]
+  QuizAttempts        QuizAttempts[]
+  QuizResult          QuizResult[]
+  StudentFee          StudentFee[]
+}
+
+model Faculty {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  displayName         String                @unique
+  dateOfBirth         DateTime
+  email               String
+  password            String
+  notificationMail    String
+  contactNo           String
+  emailVerified       Boolean               @default(false)
+  emailOtp            Int?
+  emailOtpSentTime    DateTime?
+  lastLogin           DateTime?
+  uuid                String                @default(uuid())
+  ip                  String?
+  location            String?
+  adminId             Int
+  admin               Admin                 @relation(fields: [adminId], references: [id])
+  facultyTypeId       Int
+  facultyType         FacultyType?          @relation(fields: [facultyTypeId], references: [id])
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+  Address             Address?
+  CollageDepartment   CollageDepartment[]
+  ClassroomSession    ClassroomSession[]
+  ClassroomAttendance ClassroomAttendance[]
+  ClassroomQuiz       ClassroomQuiz[]
+}
+
+model FacultyType {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  thumbnail   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  Faculty     Faculty[]
+}
+
+// ******************** //
+//
+//  PERMISSIONS SECTION
+//
+// ******************** //
+
+model Module {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  thumbnail   String
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+// ****************** //
+//
+//  ADDRESS SECTION
+//
+// ****************** //
+
+model Address {
+  id        Int       @id @default(autoincrement())
+  name      String
+  line1     String
+  line2     String?
+  zipcode   BigInt
+  contactNo String
+  cityId    Int
+  city      City      @relation(fields: [cityId], references: [id])
+  studentId Int?      @unique
+  student   Student?  @relation(fields: [studentId], references: [id])
+  facultyId Int?      @unique
+  faculty   Faculty?  @relation(fields: [facultyId], references: [id])
+  adminId   Int?      @unique
+  admin     Admin?    @relation(fields: [adminId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Country {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  State       State[]
+}
+
+model State {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  image       String?
+  countryId   Int
+  country     Country   @relation(fields: [countryId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  City        City[]
+}
+
+model City {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  image       String?
+  stateId     Int
+  state       State     @relation(fields: [stateId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  Address     Address[]
+}
+
+// **************** //
+//
+// COURSE SECTION
+//
+// **************** //
+model Course {
+  id                 Int              @id @default(autoincrement())
+  name               String           @unique
+  thumbnail          String
+  createdBy          Int
+  creator            Admin?           @relation(fields: [createdBy], references: [id])
+  description        String
+  price              Float
+  banner             String
+  active             Boolean
+  paid               Boolean
+  slug               String
+  trailer            String
+  duration           String
+  languages          String[]
+  courseCategoryId   Int
+  courseCategory     CourseCategory   @relation(fields: [courseCategoryId], references: [id])
+  courseChargeTypeId Int
+  courseChargeType   CourseChargeType @relation(fields: [courseChargeTypeId], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+  CourseMeta         CourseMeta[]
+  CourseVideo        CourseVideo[]
+}
+
+model CourseCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+  thumbnail   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  Course      Course[]
+}
+
+model CourseChargeType {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  thumbnail   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  Course      Course[]
+}
+
+model CourseMeta {
+  id        Int       @id @default(autoincrement())
+  name      String
+  value     String
+  courseId  Int
+  course    Course    @relation(fields: [courseId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model CourseVideo {
+  id              Int               @id @default(autoincrement())
+  title           String
+  description     String
+  thumbnail       String
+  video           String
+  courseId        Int
+  course          Course            @relation(fields: [courseId], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  CourseVideoMeta CourseVideoMeta[]
+}
+
+model CourseVideoMeta {
+  id        Int         @id @default(autoincrement())
+  name      String
+  value     String
+  videoId   Int
+  video     CourseVideo @relation(fields: [videoId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+}
+
+// ******************** //
+//
+//  CLASSROOM SECTION
+//
+// ******************** //
+
+model CollageDepartment {
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  thumbnail        String
+  facultyId        Int
+  faculty          Faculty?           @relation(fields: [facultyId], references: [id])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime?
+  CollageClassroom CollageClassroom[]
+}
+
+model CollageClassroom {
+  id                  Int                @id @default(autoincrement())
+  name                String
+  description         String
+  classCode           BigInt
+  syllabus            String
+  thumbnail           String
+  collageDepartmentId Int
+  collageDepartment   CollageDepartment  @relation(fields: [collageDepartmentId], references: [id])
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  deletedAt           DateTime?
+  ClassroomSession    ClassroomSession[]
+  ClassroomQuiz       ClassroomQuiz[]
+}
+
+model ClassroomSession {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  description         String
+  collageClassroomId  Int
+  collageClassroom    CollageClassroom      @relation(fields: [collageClassroomId], references: [id])
+  active              Boolean
+  meta                Json
+  attendanceActive    Boolean
+  facultyId           Int
+  faculty             Faculty               @relation(fields: [facultyId], references: [id])
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+  ClassroomAttendance ClassroomAttendance[]
+}
+
+model ClassroomAttendance {
+  id                 Int              @id @default(autoincrement())
+  semester           Int
+  studentId          Int
+  student            Student          @relation(fields: [studentId], references: [id])
+  facultyId          Int
+  faculty            Faculty          @relation(fields: [facultyId], references: [id])
+  classroomSessionId Int
+  classroomSession   ClassroomSession @relation(fields: [classroomSessionId], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+}
+
+// ******************** //
+//
+//  QUIZ SECTION
+//
+// ******************** //
+
+model ClassroomQuiz {
+  id                 Int              @id @default(autoincrement())
+  name               String
+  description        String
+  takeTime           DateTime
+  duration           String
+  collageClassroomId Int
+  collageClassroom   CollageClassroom @relation(fields: [collageClassroomId], references: [id])
+  facultyId          Int
+  faculty            Faculty          @relation(fields: [facultyId], references: [id])
+  active             Boolean
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+  QuizQuestion       QuizQuestion[]
+  QuizAttempts       QuizAttempts[]
+  QuizResult         QuizResult[]
+}
+
+model QuizQuestion {
+  id              Int            @id @default(autoincrement())
+  question        String
+  answer1         String
+  answer2         String
+  answer3         String?
+  answer4         String?
+  correctAnswer   String
+  classroomQuizId Int
+  classroomQuiz   ClassroomQuiz  @relation(fields: [classroomQuizId], references: [id])
+  image           String?
+  marks           Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+  QuizAttempts    QuizAttempts[]
+}
+
+model QuizAttempts {
+  id              Int           @id @default(autoincrement())
+  quizQuestionId  Int
+  quizQuestion    QuizQuestion  @relation(fields: [quizQuestionId], references: [id])
+  answer          String
+  studentId       Int
+  student         Student       @relation(fields: [studentId], references: [id])
+  classroomQuizId Int
+  classroomQuiz   ClassroomQuiz @relation(fields: [classroomQuizId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+}
+
+model QuizResult {
+  id              Int           @id @default(autoincrement())
+  totalMarks      Int
+  marksGained     Int
+  studentId       Int
+  student         Student       @relation(fields: [studentId], references: [id])
+  classroomQuizId Int
+  classroomQuiz   ClassroomQuiz @relation(fields: [classroomQuizId], references: [id])
+  semester        Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+}
+
+// ******************** //
+//
+//  Circular SECTION
+//
+// ******************** //
+
+model CollageCircular {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String?
+  file        String?
+  for         CircularFor @default(All)
+  metas       String?
+  adminId     Int
+  admin       Admin       @relation(fields: [adminId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+}
+
+enum CircularFor {
+  Student
+  Faculty
+  Admin
+  All
+}
+
+// ******************** //
+//
+//  Fees SECTION
+//
+// ******************** //
+
+model StudentFee {
+  id        Int       @id @default(autoincrement())
+  semester  Int
+  partial   Boolean   @default(false)
+  amount    Float
+  studentId Int
+  student   Student   @relation(fields: [studentId], references: [id])
+  approved  Boolean   @default(false)
+  adminId   Int
+  admin     Admin     @relation(fields: [adminId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
